@@ -6,15 +6,24 @@ import {
   updatePost,
   deletePost,
 } from "../controllers/postController";
+import { validateRequest } from "../middleware/validateRequest";
+import {
+  createPostSchema,
+  updatePostSchema,
+  getPostSchema,
+  deletePostSchema,
+} from "../schemas/postSchema";
 
 const router = Router();
 
-router.post("/", createPost);
+router.post("/", validateRequest(createPostSchema), createPost);
 
 router.get("/", getPosts);
-router.get("/:id", getPostById);
 
-router.put("/:id", updatePost);
-router.delete("/:id", deletePost);
+router.get("/:id", validateRequest(getPostSchema), getPostById);
+
+router.put("/:id", validateRequest(updatePostSchema), updatePost);
+
+router.delete("/:id", validateRequest(deletePostSchema), deletePost);
 
 export default router;
