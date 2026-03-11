@@ -1,124 +1,84 @@
 import { Request, Response } from "express";
 import Post from "../models/Post";
+import { asyncHandler } from "../utils/asyncHandler";
 
-export const createPost = async (req: Request, res: Response) => {
-  try {
-    const { title, content, category, tags } = req.body;
+export const createPost = asyncHandler(async (req: Request, res: Response) => {
+  const { title, content, category, tags } = req.body;
 
-    if (!title || !content || !category) {
-      return res.status(400).json({
-        message: "title, content and category are required",
-      });
-    }
-
-    const post = await Post.create({
-      title,
-      content,
-      category,
-      tags,
-    });
-
-    return res.status(201).json(post);
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
+  if (!title || !content || !category) {
+    res.status(400);
+    throw new Error("title, content and category are required");
   }
-};
 
-export const getPosts = async (req: Request, res: Response) => {
-  try {
-    const { term } = req.query;
+  const post = await Post.create({ title, content, category, tags });
 
-    let filter = {};
+  res.status(201).json(post);
+});
 
-    if (term) {
-      filter = {
-        $or: [
-          { title: { $regex: term, $options: "i" } },
-          { content: { $regex: term, $options: "i" } },
-          { category: { $regex: term, $options: "i" } },
-        ],
-      };
-    }
+export const getPosts = asyncHandler(async (req: Request, res: Response) => {
+  const { term } = req.query;
 
-    const posts = await Post.find(filter);
+  let filter = {};
 
-    return res.status(200).json(posts);
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
+  if (term) {
+    filter = {
+      $or: [
+        { title: { $regex: term, $options: "i" } },
+        { content: { $regex: term, $options: "i" } },
+        { category: { $regex: term, $options: "i" } },
+      ],
+    };
   }
-};
 
-export const getPostById = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
+  const posts = await Post.find(filter);
+  res.status(200).json(posts);
+});
 
-    const post = await Post.findById(id);
+export const getPostById = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-    if (!post) {
-      return res.status(404).json({
-        message: "Post not found",
-      });
-    }
+  const post = await Post.findById(id);
 
-    return res.status(200).json(post);
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
+  if (!post) {
+    res.status(404);
+    throw new Error("Post not found");
   }
-};
 
-export const updatePost = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { title, content, category, tags } = req.body;
+  res.status(200).json(post);
+});
 
-    if (!title || !content || !category) {
-      return res.status(400).json({
-        message: "title, content and category are required",
-      });
-    }
+export const updatePost = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { title, content, category, tags } = req.body;
 
-    const updatedPost = await Post.findByIdAndUpdate(
-      id,
-      { title, content, category, tags },
-      { new: true }
-    );
-
-    if (!updatedPost) {
-      return res.status(404).json({
-        message: "Post not found",
-      });
-    }
-
-    return res.status(200).json(updatedPost);
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
+  if (!title || !content || !category) {
+    res.status(400);
+    throw new Error("title, content and category are required");
   }
-};
 
-export const deletePost = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
+  const updatedPost = await Post.findByIdAndUpdate(
+    id,
+    { title, content, category, tags },
+    { new: true }
+  );
 
-    const deletedPost = await Post.findByIdAndDelete(id);
-
-    if (!deletedPost) {
-      return res.status(404).json({
-        message: "Post not found",
-      });
-    }
-
-    return res.status(204).send();
-  } catch (error) {
-    return res.status(500).json({
-      message: "Internal server error",
-    });
+  if (!updatedPost) {
+    res.status(404);
+    throw new Error("Post not found");
   }
-};
+
+  res.status(200).json(updatedPost);
+});
+
+export const deletePost = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const deletedPost = await Post.findByIdAndDelete(id);
+
+  if (!deletedPost) {
+    res.status(404);
+    throw new Error("Post not found");
+  }
+
+  res.status(204).send();
+});
