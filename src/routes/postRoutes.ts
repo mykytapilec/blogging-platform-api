@@ -3,6 +3,8 @@ import {
   createPost,
   getPosts,
   getPostById,
+  updatePost,
+  deletePost,
 } from "../controllers/postController";
 
 const router = Router();
@@ -12,12 +14,7 @@ router.post("/", createPost);
 router.get("/", getPosts);
 router.get("/:id", getPostById);
 
-router.put("/:id", (req, res) => {
-  res.json({ message: "Update post" });
-});
-
-router.delete("/:id", (req, res) => {
-  res.json({ message: "Delete post" });
-});
+router.put("/:id", updatePost);
+router.delete("/:id", deletePost);
 
 export default router;
