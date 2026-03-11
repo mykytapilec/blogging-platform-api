@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Post from "../models/Post";
 import { asyncHandler } from "../utils/asyncHandler";
+import { ApiError } from "../utils/ApiError";
 
 export const createPost = asyncHandler(async (req: Request, res: Response) => {
   const { title, content, category, tags } = req.body;
@@ -40,8 +41,7 @@ export const getPostById = asyncHandler(async (req: Request, res: Response) => {
   const post = await Post.findById(id);
 
   if (!post) {
-    res.status(404);
-    throw new Error("Post not found");
+    throw new ApiError(404, "Post not found");
   }
 
   res.status(200).json(post);
